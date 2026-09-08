@@ -17,7 +17,11 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.30.0",
+    "body-parser": "1.20.3",
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "4.21.2"
+  },
+  "overrides": {
+    "debug": "4.4.3"
   }
 }
