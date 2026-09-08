@@ -14,6 +14,9 @@
   "author": "",
   "license": "ISC",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0 <21.0.0"
+  },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.30.0",
@@ -22,6 +25,6 @@
     "express": "4.21.2"
   },
   "overrides": {
-    "debug": "4.4.3"
+    "debug": "^4.3.7"
   }
 }
