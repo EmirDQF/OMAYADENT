@@ -23,7 +23,7 @@ async function getConversations() {
   // Select conversations ordered by last_message_at desc
   const { data, error } = await supabase
     .from('conversations')
-    .select('id,conversation_id,contact_number,contact_name,last_message_at,created_at')
+    .select('id,conversation_id,contact_number,contact_name,last_message_at,created_at,priority,alert_type,needs_follow_up')
     .order('last_message_at', { ascending: false });
   if (error) {
     console.error('getConversations error', error);
@@ -63,7 +63,10 @@ async function saveMessage(msg) {
     conversation_id: msg.conversation_id,
     contact_number: msg.conversation_id,
     contact_name: msg.contact_name || null,
-    last_message_at: t
+    last_message_at: t,
+    priority: Boolean(msg.priority),
+    alert_type: msg.alert_type || null,
+    needs_follow_up: Boolean(msg.priority),
   };
 
   // Upsert conversation by conversation_id
@@ -112,7 +115,9 @@ async function saveMessage(msg) {
     type: data.type,
     content: data.content,
     media_url: data.media_url,
-    created_at: data.created_at
+    created_at: data.created_at,
+    priority: Boolean(msg.priority),
+    alert_type: msg.alert_type || null
   };
 
   emitter.emit('message_saved', message);
@@ -126,7 +131,7 @@ async function searchConversations(q) {
   // Search by contact_name or contact_number ILIKE
   const { data, error } = await supabase
     .from('conversations')
-    .select('id,conversation_id,contact_number,contact_name,last_message_at,created_at')
+    .select('id,conversation_id,contact_number,contact_name,last_message_at,created_at,priority,alert_type,needs_follow_up')
     .or(`contact_name.ilike.%${q}%,contact_number.ilike.%${q}%`)
     .order('last_message_at', { ascending: false });
   if (error) {

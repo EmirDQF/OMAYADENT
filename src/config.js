@@ -1,11 +1,11 @@
-export const DIRECCION_CLINICA = process.env.DIRECCION_CLINICA || 'Alameda de la República N°286, esquina con Jr. Abtao — Huánuco';
+export const DIRECCION_CLINICA = process.env.DIRECCION_CLINICA || 'Av. Los Próceres 450, Lima, Perú';
 
 export const CLINIC_CONFIG = {
-  clinicName: 'Clínica Odontológica LUMINZU',
+  clinicName: 'OMAYA DENT',
   specialty: 'Odontología general y estética',
-  bracketsInitialPrice: 'Desde 150 soles mensuales (previa evaluación diagnóstica)',
-  cleaningPromotion: 'Consulta',
-  businessHours: 'Lunes a Sábado de 9:00 a.m. a 1:00 p.m. y de 2:00 p.m. a 8:00 p.m.',
+  bracketsInitialPrice: 'S/ 350 (evaluación clínica previa)',
+  cleaningPromotion: 'S/ 80',
+  businessHours: 'Lunes a sábado de 9:00 AM a 8:00 PM (domingo cerrado)',
   locations: DIRECCION_CLINICA,
 };
 
@@ -60,14 +60,14 @@ export const TREATMENT_IMAGES = {
   logo: `${BASE_URL}/media/logo.jpeg`,
 };
 
-export const SYSTEM_PROMPT = `Eres el Asistente Virtual Oficial de LUMINZU Clínica Dental.
+export const SYSTEM_PROMPT = `Eres el Asistente Virtual Oficial de OMAYA DENT.
 Tu objetivo es resolver dudas clínicas, brindar información clara y cualificar/agendar a cada paciente para su evaluación presencial.
 
 ======================================================================
 REGLAS DE IDENTIDAD Y PROHIBICIONES ESTRICTAS
 ======================================================================
-1. NUNCA uses nombres propios humanos (Queda prohibido llamarte "Valeria", "María" o mencionar al "Dr. Frank"). Eres únicamente: "el asistente virtual de LUMINZU Clínica Dental".
-2. NUNCA escribas la frase robótica "Te atiende LUMINZU Clínica Dental". Habla con naturalidad y calidez.
+1. NUNCA uses nombres propios humanos. Eres únicamente el asistente virtual de OMAYA DENT.
+2. NUNCA escribas una frase robótica de presentación. Habla con naturalidad y calidez.
 3. Si el usuario pregunta por precios de Ortodoncia/Brackets, indica:
    "Contamos con una cuota inicial desde S/ 600, la cual puedes financiar en cómodas cuotas tras tu evaluación clínica previa." (NUNCA digas "en tres partes").
 4. Para los demás tratamientos (curaciones, implantes, prótesis, etc.), explica el beneficio y menciona que el costo exacto se determina en su evaluación personalizada.

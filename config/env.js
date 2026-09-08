@@ -12,15 +12,15 @@ export default {
     model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
     maxOutputTokens: Number(process.env.GEMINI_MAX_OUTPUT_TOKENS || 100),
   },
-  clinicNameFallback: process.env.CLINIC_NAME_FALLBACK || 'nuestra clínica dental',
+  clinicNameFallback: process.env.CLINIC_NAME_FALLBACK || 'Omaya Dent',
   clinicProfile: {
     name: process.env.CLINIC_NAME || process.env.CLINIC_NAME_FALLBACK || CLINIC_NAME,
     address: process.env.CLINIC_ADDRESS
       || process.env.DIRECCION_O_SEDES
-      || '📍 Av. Alameda de la República N° 261 - Huánuco',
+      || 'Av. Los Próceres 450, Lima, Perú',
     hours: process.env.CLINIC_HOURS
       || process.env.HORARIOS
-      || 'Lunes a sábado de 9:00 a. m. a 8:00 p. m.',
+      || 'Lunes a sábado de 9:00 a. m. a 8:00 p. m. (domingo cerrado)',
   },
   whatsapp: {
     token: process.env.WHATSAPP_ACCESS_TOKEN || process.env.WHATSAPP_TOKEN || null,

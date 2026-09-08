@@ -1,7 +1,17 @@
 // config/catalogo.js
 
 const BASE_URL = (process.env.RENDER_EXTERNAL_URL || 'https://bot-reumatologia-cqpharma.onrender.com').replace(/\/+$/, '') + '/media/';
-export const CLINIC_NAME = 'LUMINZU Clínica Dental';
+export const CLINIC_NAME = 'OMAYA DENT';
+export const CLINIC_ADDRESS = 'Av. Los Próceres 450, Lima, Perú';
+export const CLINIC_HOURS = 'Lunes a sábado de 9:00 AM a 8:00 PM (domingo cerrado)';
+export const SERVICE_PRICES = {
+  consulta: 'S/ 30',
+  limpieza: 'S/ 80',
+  resina: 'S/ 70',
+  blanqueamiento: 'S/ 250',
+  ortodoncia: 'S/ 350',
+  endodoncia: 'S/ 280',
+};
 
 const toUrl = (file) => `${BASE_URL}${file}`;
 
@@ -47,7 +57,7 @@ const SERVICIOS = {
   }
 };
 
-const CATALOGO_LUMINZU = {
+const CATALOGO_OMAYA = {
   // === ORTODONCIA & BRACKETS ===
   ortodoncia: toUrl('ortodoncia_promo.jpeg'),
   brackets: toUrl('ortodoncia_promo.jpeg'),
@@ -141,7 +151,7 @@ function obtenerImagen(clave) {
     }
   }
 
-  const resultado = CATALOGO_LUMINZU[key];
+  const resultado = CATALOGO_OMAYA[key];
   if (!resultado) return null;
 
   if (Array.isArray(resultado)) {
@@ -154,8 +164,8 @@ function obtenerImagen(clave) {
 export {
   BASE_URL,
   SERVICIOS,
-  CATALOGO_LUMINZU,
+  CATALOGO_OMAYA,
   obtenerImagen,
 };
 
-export default CATALOGO_LUMINZU;
+export default CATALOGO_OMAYA;

@@ -2,14 +2,12 @@
 // Usage: node scripts/keepAlive.js
 // It will ping the URL every 10 minutes (configurable via KEEPALIVE_INTERVAL_MS)
 
-import fetch from 'node-fetch';
-
-const url = process.env.KEEPALIVE_URL || `https://bot-mensajes-dental.onrender.com/health`;
+const url = process.env.KEEPALIVE_URL || `${process.env.RENDER_EXTERNAL_URL || 'http://localhost:3000'}/health`;
 const intervalMs = Number(process.env.KEEPALIVE_INTERVAL_MS || 10 * 60 * 1000);
 
 async function ping() {
   try {
-    const res = await fetch(url, { method: 'GET', timeout: 10000 });
+    const res = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(10000) });
     const ok = res.ok;
     console.log(`keepAlive: pinged ${url} -> ${res.status} ${res.statusText}`);
   } catch (e) {

@@ -106,7 +106,7 @@ Perfecto, tu cita queda agendada.`);
     const res = await obtenerRespuestaIA(makeJid(), 'quiero agendar', { client });
     assert.ok(capturedRequest, 'generateContent should be called');
     assert.ok(capturedRequest.systemInstruction.includes('Asistente Virtual Oficial'));
-    assert.ok(capturedRequest.systemInstruction.includes('LUMINZU'));
+    assert.ok(capturedRequest.systemInstruction.includes('OMAYA DENT'));
     assert.ok(!capturedRequest.systemInstruction.includes('Valeria'));
     assert.ok(res.texto.includes('Hola'));
   });

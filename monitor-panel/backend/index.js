@@ -134,7 +134,9 @@ app.post('/api/hook', async (req, res) => {
     type: body.type || 'text',
     content: body.content || null,
     media_url: body.media_url || null,
-    timestamp: body.timestamp || new Date().toISOString()
+    timestamp: body.timestamp || new Date().toISOString(),
+    priority: Boolean(body.priority),
+    alert_type: body.alert_type || null
   };
 
   const saved = await db.saveMessage(msg);

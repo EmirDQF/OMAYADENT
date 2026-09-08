@@ -14,6 +14,7 @@ import {
   sendCampaignWelcome,
 } from '../services/mediaTrackingService.js';
 import { obtenerImagen } from '../config/catalogo.js';
+import { AFTER_HOURS_MESSAGE, ARRIVAL_MESSAGE, isArrivalIntent, isWithinBusinessHours } from '../services/businessHours.js';
 
 // Helper: upsert a message into chat_sessions.history
 let supabaseClient = null;
@@ -61,7 +62,10 @@ async function hardResetUserSession(phone) {
   }
 }
 
-async function persistToSupabaseConversation({ conversationId, contactNumber, contactName, sender, text, mediaUrl, timestamp }) {
+async function persistToSupabaseConversation({
+  conversationId, contactNumber, contactName, sender, text, mediaUrl, timestamp,
+  priority = false, alertType = null,
+}) {
   let supabase;
   try {
     supabase = await getSupabaseClient();
@@ -83,7 +87,10 @@ async function persistToSupabaseConversation({ conversationId, contactNumber, co
       contact_name: contactName || phone,
       last_message: lastMessage,
       last_message_at: ts,
-      created_at: ts
+      created_at: ts,
+      priority,
+      alert_type: alertType,
+      needs_follow_up: priority,
     }, { onConflict: 'conversation_id' });
 
     if (upsertErr) {
@@ -137,7 +144,14 @@ async function persistToChatSessions(sessionIdentifier, entry) {
     history.push(entry);
     chatSessionHistoryCache.set(sessionId, history);
 
-    const upsertPayload = { id: sessionId, history, updated_at: new Date().toISOString() };
+    const lastEntry = history.at(-1) || {};
+    const upsertPayload = {
+      id: sessionId,
+      history,
+      updated_at: new Date().toISOString(),
+      priority: Boolean(lastEntry.priority),
+      alert_type: lastEntry.alertType || null,
+    };
     const { error: upErr } = await client.from('chat_sessions').upsert([upsertPayload], { onConflict: 'id' });
     if (upErr) {
       console.error('[Supabase] Error al persistir conversación:', upErr);
@@ -150,7 +164,7 @@ async function persistToChatSessions(sessionIdentifier, entry) {
   }
 }
 
-async function notifyMonitorPanel({ conversation_id, contact_name, sender, type, content, media_url, timestamp }) {
+async function notifyMonitorPanel({ conversation_id, contact_name, sender, type, content, media_url, timestamp, priority = false, alert_type = null }) {
   const panelBaseUrl = (process.env.PANEL_BACKEND_URL || 'https://whatsapp-dashboard-z9jm.onrender.com').replace(/\/+$/, '');
   const username = process.env.PANEL_USER || process.env.PANEL_USERNAME;
   const password = process.env.PANEL_PASSWORD || process.env.PANEL_PASS;
@@ -166,6 +180,8 @@ async function notifyMonitorPanel({ conversation_id, contact_name, sender, type,
       content: content || null,
       media_url: media_url || null,
       timestamp: timestamp || new Date().toISOString(),
+      priority,
+      alert_type,
     };
 
     const res = await fetch(`${panelBaseUrl}/api/hook`, {
@@ -333,6 +349,56 @@ const userProcessingQueues = new Map();
 const intakeQueues = new Map();
 const BUFFER_WAIT_MS = 3500;
 
+async function sendImmediatePriorityReply(from, text, alertType) {
+  const timestamp = new Date().toISOString();
+  await persistToSupabaseConversation({
+    conversationId: from,
+    contactNumber: from,
+    contactName: from,
+    sender: 'user',
+    text,
+    timestamp,
+    priority: true,
+    alertType,
+  });
+  await persistToChatSessions(from, {
+    from: 'patient',
+    text,
+    phone: from,
+    priority: true,
+    alertType,
+    timestamp,
+  });
+  await whatsappService.sendWhatsAppMessage(from, alertType === 'arrival' ? ARRIVAL_MESSAGE : AFTER_HOURS_MESSAGE);
+  await persistToSupabaseConversation({
+    conversationId: from,
+    contactNumber: from,
+    contactName: from,
+    sender: 'bot',
+    text: alertType === 'arrival' ? ARRIVAL_MESSAGE : AFTER_HOURS_MESSAGE,
+    timestamp: new Date().toISOString(),
+    priority: true,
+    alertType,
+  });
+  await persistToChatSessions(from, {
+    from: 'bot',
+    text: alertType === 'arrival' ? ARRIVAL_MESSAGE : AFTER_HOURS_MESSAGE,
+    phone: from,
+    priority: true,
+    alertType,
+    timestamp: new Date().toISOString(),
+  });
+  await notifyMonitorPanel({
+    conversation_id: from,
+    sender: 'bot',
+    type: 'text',
+    content: alertType === 'arrival' ? ARRIVAL_MESSAGE : AFTER_HOURS_MESSAGE,
+    timestamp: new Date().toISOString(),
+    priority: true,
+    alert_type: alertType,
+  });
+}
+
 async function downloadIncomingImage(mediaId) {
   const token = config.whatsapp?.token || process.env.WHATSAPP_TOKEN;
   const version = config.whatsapp?.apiVersion || process.env.WHATSAPP_API_VERSION || 'v17.0';
@@ -469,10 +535,10 @@ async function addMessageToBuffer(from, part, context) {
   messageBuffers.set(from, current);
 }
 
-const CAMPAIGN_WELCOME_TEXT = `¡Hola! 👋 Bienvenido/a a LUMINZU Clínica Dental (Sede Huánuco) 🦷✨
+const CAMPAIGN_WELCOME_TEXT = `¡Hola! 👋 Bienvenido/a a OMAYA DENT 🦷✨
 
-Te atendemos de lunes a sábado de 9:00 am a 8:00 pm.
-Llegas en el momento ideal para aprovechar nuestros beneficios por campaña (facilidades de pago en cuotas, brackets con cuota inicial S/ 0 y evaluación digital con cámara intraoral).
+Te atendemos en Av. Los Próceres 450, Lima, de lunes a sábado de 9:00 am a 8:00 pm.
+Consulta y diagnóstico desde S/ 30.
 Para ayudarte rápido y de forma personalizada, cuéntanos:
 
 👉 ¿Qué tratamiento o molestia dental deseas solucionar primero?
@@ -529,6 +595,14 @@ export default async function webhookController(req, res, next) {
         if (message.type === 'text' && /^\/?(reset|reiniciar|borrar|clear)$/i.test(text || '')) {
           messageBuffers.delete(from);
           await hardResetUserSession(from);
+          if (text && isArrivalIntent(text)) {
+            await sendImmediatePriorityReply(from, text, 'arrival');
+            return;
+          }
+          if (!isWithinBusinessHours()) {
+            await sendImmediatePriorityReply(from, text, 'after_hours');
+            return;
+          }
           await sendCampaignWelcomeMessage(from);
           return;
         }

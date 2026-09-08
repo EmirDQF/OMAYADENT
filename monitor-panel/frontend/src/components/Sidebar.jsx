@@ -13,7 +13,10 @@ export default function Sidebar({ conversations = [], onSelect, selected }){
           const id = getConversationId(conv)
           return (
             <div key={id ?? `${conv.contact_number}-${conv.last_message_at}`} className={`conversation-item ${selected===id? 'selected':''}`} onClick={()=>id && onSelect(id)}>
-              <div className="conv-title">{conv.contact_name || conv.contact_number}</div>
+              <div className="conv-title">
+                {conv.priority && <span title={conv.alert_type || 'Seguimiento prioritario'}>🚨 </span>}
+                {conv.contact_name || conv.contact_number}
+              </div>
               <div className="conv-preview">{conv.preview || ''}</div>
               <div className="conv-time">{conv.last_message_at ? new Date(conv.last_message_at).toLocaleString() : ''}</div>
             </div>

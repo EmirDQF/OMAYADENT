@@ -57,7 +57,7 @@ export default function App(){
         const found = prev.find(c => getConversationId(c) === conversationId)
         const preview = msg.type === 'image' ? '📷 Image' : (msg.content || '')
         if(found){
-          return [{...found, last_message_at: msg.created_at || msg.timestamp, preview}, ...prev.filter(c => getConversationId(c) !== conversationId)]
+          return [{...found, last_message_at: msg.created_at || msg.timestamp, preview, priority: msg.priority || found.priority, alert_type: msg.alert_type || found.alert_type}, ...prev.filter(c => getConversationId(c) !== conversationId)]
         }
         const conv = { id: conversationId, conversation_id: conversationId, contact_number: conversationId, contact_name: msg.contact_name || conversationId, last_message_at: msg.created_at || msg.timestamp, preview }
         return [conv, ...prev]

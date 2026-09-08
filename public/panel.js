@@ -15,7 +15,7 @@ const conversationData = [
       },
       {
         sender: 'bot',
-        text: 'Nos encontramos en la Av. Alameda de la República N° 261, aquí en Huánuco. Te comparto el croquis para que llegues sin problemas. ✨',
+        text: 'Nos encontramos en Av. Los Próceres 450, Lima, Perú. Te comparto el croquis para que llegues sin problemas. ✨',
         timestamp: Date.now() - 1000 * 60 * 46,
       },
       {
@@ -25,7 +25,7 @@ const conversationData = [
       },
       {
         sender: 'bot',
-        text: '¡Hola! 🤍 En LUMINZU realizamos:\n• Ortodoncia (brackets tradicionales y para niños)\n• Limpieza dental y kit preventivo\n• Carillas dentales y diseño de sonrisa\n• Implantes dentales\n• Prótesis dental\n• Endodoncia\n• Odontopediatría\n\n¿Cuál de ellos te interesa para darte más detalles o mostrarte fotos? ✨',
+        text: '¡Hola! 🤍 En OMAYA DENT realizamos:\n• Consulta y diagnóstico: S/ 30\n• Limpieza profunda: S/ 80\n• Curación con resina: S/ 70\n• Blanqueamiento: S/ 250\n• Ortodoncia: S/ 350\n• Endodoncia: S/ 280\n\n¿Cuál de ellos te interesa para darte más detalles? ✨',
         timestamp: Date.now() - 1000 * 60 * 30,
       },
       {

@@ -1,5 +1,5 @@
 import config from '../config/env.js';
-import { CATALOGO_LUMINZU } from '../config/catalogo.js';
+import { CATALOGO_OMAYA } from '../config/catalogo.js';
 
 const LIMA_TIME_ZONE = 'America/Lima';
 const SESSION_TTL_MS = Number(process.env.GEMINI_SESSION_TTL_MS || 30 * 60 * 1000);
@@ -8,19 +8,19 @@ const DEBOUNCE_MS = Number(process.env.GEMINI_DEBOUNCE_MS || 0);
 const MAX_HISTORY_MESSAGES = Number(process.env.GEMINI_MAX_HISTORY || 6);
 const MAX_OUTPUT_TOKENS = 300;
 const CLEANUP_MS = Number(process.env.GEMINI_CLEANUP_MS || 60 * 1000);
-export const SYSTEM_PROMPT = `Eres el asistente virtual de LUMINZU Clínica Dental. Responde breve y amable. Prioriza responder exactamente lo que el cliente pregunta; invita a agendar solo cuando ya diste la información pedida o el cliente muestra intención de cita, sin repetir la invitación en cada mensaje.
+export const SYSTEM_PROMPT = `Eres el asistente virtual de OMAYA DENT. Responde breve y amable. Prioriza responder exactamente lo que el cliente pregunta; invita a agendar solo cuando ya diste la información pedida o el cliente muestra intención de cita, sin repetir la invitación en cada mensaje.
 
-El saludo inicial de campaña, con el logo y la información de bienvenida, ya fue entregado al usuario y no debe repetirse en respuestas posteriores. Si el paciente menciona una molestia o tratamiento, resuelve brevemente la duda e invítalo de inmediato a agendar la evaluación digital de S/ 30; si inicia tratamiento el mismo día, la evaluación es gratis. Si desea agendar directamente, solicita de forma ágil su Nombre Completo, tratamiento de interés y día y rango de hora preferido, de lunes a sábado de 9:00 am a 8:00 pm. Responde cualquier consulta sobre costos, dolor o procedimientos con calidez y brevedad (máximo 2 párrafos). Al final de CADA respuesta, guía siempre al paciente a agendar preguntando qué día le acomoda y si en turno mañana o tarde. Si confirma fecha y turno, solicita su Nombre Completo y DNI para reservar su cita.
+El saludo inicial de campaña, con el logo y la información de bienvenida, ya fue entregado al usuario y no debe repetirse en respuestas posteriores. Si el paciente menciona una molestia o tratamiento, resuelve brevemente la duda e invítalo a agendar la consulta y diagnóstico de S/ 30. Si desea agendar directamente, solicita su Nombre Completo, DNI, tratamiento de interés y día y rango de hora preferido, de lunes a sábado de 9:00 am a 8:00 pm. Responde cualquier consulta sobre costos, dolor o procedimientos con calidez y brevedad (máximo 2 párrafos). Al final de CADA respuesta, guía siempre al paciente a agendar preguntando qué día le acomoda y si en turno mañana o tarde.
 
 Reglas:
 - Máximo 2-3 oraciones cortas y 1-2 emojis por mensaje.
 - El saludo inicial de campaña se envía una sola vez antes de la primera respuesta conversacional, con la etiqueta [ENVIAR_IMAGEN:logo]. No repitas ese saludo ni el logo en mensajes posteriores.
-- Si hablas de ortodoncia, menciona cuota inicial desde S/ 600 previa evaluación clínica.
-- Para los demás tratamientos, indica que el costo exacto se define en la evaluación clínica.
+- Precios referenciales: consulta y diagnóstico S/ 30; profilaxis/limpieza profunda S/ 80; curación simple con resina S/ 70; blanqueamiento dental S/ 250; ortodoncia (evaluación/cuota inicial) S/ 350; endodoncia S/ 280.
+- Indica que el precio final puede confirmarse en la evaluación clínica.
 - Cuando el paciente consulte o pregunte por un tema o tratamiento específico, agrega al final del mensaje la etiqueta EXACTA correspondiente según esta guía:
 
 Guía de imágenes a enviar:
-• Bienvenida inicial o qué es Luminzu: [ENVIAR_IMAGEN:logo]
+• Bienvenida inicial o qué es Omaya Dent: [ENVIAR_IMAGEN:logo]
 • Dirección, sede o cómo llegar: [ENVIAR_IMAGEN:ubicacion]
 • Cómo es la clínica por fuera / fachada: [ENVIAR_IMAGEN:fachada]
 • Promociones, ofertas o costo de consulta: [ENVIAR_IMAGEN:promo_consulta]
@@ -256,13 +256,13 @@ function limaNow() {
 
 export function buildSystemPromptWithContext(jid, session = null, clinic = null) {
   const profile = clinic || config.clinicProfile || {};
-  const address = profile.address || 'Alameda de la República N° 286, esquina con Jr. Abtao — Huánuco';
+  const address = profile.address || 'Av. Los Próceres 450, Lima, Perú';
   const hours = profile.hours || 'Lunes a sábado de 9:00 a. m. a 8:00 p. m.';
   const snapshot = session?.leadSnapshot;
   const patientName = snapshot?.nombre || extractLeadDataFromText(textFromHistory(session?.history))?.nombre;
   const booked = session?.booked ? '\nEsta sesión ya tiene una cita registrada. No vuelvas a pedir sus datos salvo que solicite cambios.' : '';
-  const systemPrompt = SYSTEM_PROMPT.replaceAll('[NOMBRE DE TU CLÍNICA]', profile.name || 'LUMINZU Clínica Dental');
-  return `${systemPrompt}\n\nDATOS ACTUALIZADOS:\n- Clínica: ${profile.name || 'LUMINZU Clínica Dental'}\n- Dirección: ${address}\n- Horario: ${hours}\n- Fecha y hora actual en Lima: ${limaNow()}\n- Número de WhatsApp del usuario: ${sessionId(jid)}\n  ${patientName ? `- Nombre del paciente ya proporcionado: ${patientName}` : ''}${snapshot ? `- Datos ya proporcionados: ${JSON.stringify(snapshot)}` : ''}${booked}`;
+  const systemPrompt = SYSTEM_PROMPT.replaceAll('[NOMBRE DE TU CLÍNICA]', profile.name || 'OMAYA DENT');
+  return `${systemPrompt}\n\nDATOS ACTUALIZADOS:\n- Clínica: ${profile.name || 'OMAYA DENT'}\n- Dirección: ${address}\n- Horario: ${hours}\n- Fecha y hora actual en Lima: ${limaNow()}\n- Número de WhatsApp del usuario: ${sessionId(jid)}\n  ${patientName ? `- Nombre del paciente ya proporcionado: ${patientName}` : ''}${snapshot ? `- Datos ya proporcionados: ${JSON.stringify(snapshot)}` : ''}${booked}`;
 }
 
 export function parseTextToLimaDate(text) {
@@ -424,7 +424,7 @@ export function determinarCategoriaImagen(mensaje, respuestaIA) {
 
 export function getImagenCategoria(categoria) {
   if (!categoria) return null;
-  const valor = CATALOGO_LUMINZU[categoria] || CATALOGO_LUMINZU.default || CATALOGO_LUMINZU.tratamientos || null;
+  const valor = CATALOGO_OMAYA[categoria] || CATALOGO_OMAYA.default || CATALOGO_OMAYA.tratamientos || null;
   // Si la categoría tiene varias fotos (ej. casos antes/después), elige una al azar
   // en vez de mandar siempre la primera — así no se repite la misma imagen cada vez.
   if (Array.isArray(valor)) {
