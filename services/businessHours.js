@@ -24,7 +24,7 @@ export function isWithinBusinessHours(date = new Date()) {
 
 export function isArrivalIntent(text) {
   if (typeof text !== 'string') return false;
-  return /\b(?:ya\s+estoy\s+(?:yendo|aqui|afuera)|estoy\s+afuera|llego\s+en\s+\d+\s*(?:minutos?|mins?)|estoy\s+a\s+\d+\s*(?:minutos?|mins?)|estoy\s+en\s+(?:la\s+)?puerta)\b/i.test(text.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+  return /\b(?:ya\s+estoy\s+(?:yendo|aqui|afuera)|estoy\s+afuera|llego\s+en\s+\d+\s*(?:minutos?|mins?)|estoy\s+a\s+\d+\s*(?:minutos?|mins?)|estoy\s+en\s+(?:la\s+)?puerta|ya\s+llegue)\b/i.test(text.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
 }
 
 export const AFTER_HOURS_MESSAGE = `Gracias por escribir a OMAYA DENT. En este momento estamos fuera de nuestro horario de atención (lunes a sábado, de 9:00 AM a 8:00 PM; domingo cerrado), pero nuestra asistente virtual puede ayudarle ahora mismo:

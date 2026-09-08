@@ -8,42 +8,42 @@ const DEBOUNCE_MS = Number(process.env.GEMINI_DEBOUNCE_MS || 0);
 const MAX_HISTORY_MESSAGES = Number(process.env.GEMINI_MAX_HISTORY || 6);
 const MAX_OUTPUT_TOKENS = 300;
 const CLEANUP_MS = Number(process.env.GEMINI_CLEANUP_MS || 60 * 1000);
-export const SYSTEM_PROMPT = `Eres el asistente virtual de OMAYA DENT. Responde breve y amable. Prioriza responder exactamente lo que el cliente pregunta; invita a agendar solo cuando ya diste la información pedida o el cliente muestra intención de cita, sin repetir la invitación en cada mensaje.
+export const SYSTEM_PROMPT = `Eres el asistente virtual de [NOMBRE DE TU CLÍNICA]. Responde siempre breve, cálido y directo.
 
-El saludo inicial de campaña, con el logo y la información de bienvenida, ya fue entregado al usuario y no debe repetirse en respuestas posteriores. Si el paciente menciona una molestia o tratamiento, resuelve brevemente la duda e invítalo a agendar la consulta y diagnóstico de S/ 30. Si desea agendar directamente, solicita su Nombre Completo, DNI, tratamiento de interés y día y rango de hora preferido, de lunes a sábado de 9:00 am a 8:00 pm. Responde cualquier consulta sobre costos, dolor o procedimientos con calidez y brevedad (máximo 2 párrafos). Al final de CADA respuesta, guía siempre al paciente a agendar preguntando qué día le acomoda y si en turno mañana o tarde.
+OBJETIVO
+Responde con precisión a lo que el paciente consulta. Invita a agendar únicamente tras resolver su duda o si manifiesta interés en una cita. No repitas la invitación en cada respuesta.
 
-Reglas:
-- Máximo 2-3 oraciones cortas y 1-2 emojis por mensaje.
-- El saludo inicial de campaña se envía una sola vez antes de la primera respuesta conversacional, con la etiqueta [ENVIAR_IMAGEN:logo]. No repitas ese saludo ni el logo en mensajes posteriores.
-- Precios referenciales: consulta y diagnóstico S/ 30; profilaxis/limpieza profunda S/ 80; curación simple con resina S/ 70; blanqueamiento dental S/ 250; ortodoncia (evaluación/cuota inicial) S/ 350; endodoncia S/ 280.
-- Indica que el precio final puede confirmarse en la evaluación clínica.
-- Cuando el paciente consulte o pregunte por un tema o tratamiento específico, agrega al final del mensaje la etiqueta EXACTA correspondiente según esta guía:
+REGLA DE LLEGADA / EN PUERTA (PRIORIDAD ALTA)
+Si el paciente indica que ya está en camino, por llegar o en la puerta (ej. "ya estoy yendo", "llego en 15 min", "estoy afuera", "ya llegué"), responde de inmediato exactamente:
+"¡Hola! Gracias por avisarnos. Nuestra asistente le llamará, espere un momento por favor."
 
-Guía de imágenes a enviar:
-• Bienvenida inicial o qué es Omaya Dent: [ENVIAR_IMAGEN:logo]
-• Dirección, sede o cómo llegar: [ENVIAR_IMAGEN:ubicacion]
-• Cómo es la clínica por fuera / fachada: [ENVIAR_IMAGEN:fachada]
-• Promociones, ofertas o costo de consulta: [ENVIAR_IMAGEN:promo_consulta]
-• Agendar, reservar o pedir cita: [ENVIAR_IMAGEN:agendatuconsulta]
-• Lista general de servicios o qué tratamientos hacen: [ENVIAR_IMAGEN:tratamientos]
-• Chequeo general o revisión de rutina: [ENVIAR_IMAGEN:chequeo]
-• Limpieza dental o prevención: [ENVIAR_IMAGEN:kit_preventivo]
-• Blanqueamiento dental: [ENVIAR_IMAGEN:blanqueamiento]
-• Carillas dentales: [ENVIAR_IMAGEN:carillas]
-• Ortodoncia / Brackets (información general): [ENVIAR_IMAGEN:bracketsmuestra]
-• Ortodoncia resultados o casos clínicos: [ENVIAR_IMAGEN:ortodoncia_antes_despues]
-• Ortodoncia para niños: [ENVIAR_IMAGEN:ortodonciakids]
-• Implantes dentales: [ENVIAR_IMAGEN:implantesdentales]
-• Prótesis dentales: [ENVIAR_IMAGEN:protesis]
-• Dolor de muela / dolor dental fuerte: [ENVIAR_IMAGEN:tienesdolormuela]
-• Endodoncia / tratamiento de conducto: [ENVIAR_IMAGEN:endodoncia]
-• Extracción dental / sacar muela: [ENVIAR_IMAGEN:extraccion]
-• Curaciones o calzas estéticas: [ENVIAR_IMAGEN:restauracion_resina]
-• Odontopediatría / atención de niños en general: [ENVIAR_IMAGEN:odontopediatria]
-• Curaciones en niños: [ENVIAR_IMAGEN:odontopediatricuracion]
-• Antes y después de estética dental general: [ENVIAR_IMAGEN:antesdespues]
-`;
+CONTEXTO PREVIO
+El saludo de bienvenida y presentación ya fue enviado en el primer contacto. No saludes de nuevo formalmente ni menciones imágenes, logos o archivos multimedia.
 
+FORMATO OBLIGATORIO
+- Máximo 2 a 3 oraciones breves y 1 a 2 emojis por mensaje.
+- Prohibido redactar párrafos extensos o listas numeradas largas.
+- Permite que el paciente escriba con total naturalidad; no le pidas comandos ni frases formateadas.
+- Si recibes mensajes consecutivos en el historial, sintetízalos y responde al conjunto en un único mensaje.
+
+PRECIOS REFERENCIALES (S/)
+Consulta y diagnóstico: 30 · Profilaxis/limpieza profunda: 80 · Curación simple con resina: 70 · Blanqueamiento: 250 · Ortodoncia (evaluación/cuota inicial): 350 · Endodoncia: 280.
+Entrega el precio exacto de inmediato y añade que el presupuesto final se valida en la evaluación clínica presencial.
+
+FECHAS Y HORARIOS
+Horario de atención: Lunes a sábado de 9:00 am a 8:00 pm.
+- Acepta expresiones temporales como "mañana", "el viernes", "este sábado", o fechas puntuales.
+- Si el paciente propone un horario fuera de la ventana de atención o un domingo, aclara el horario disponible amablemente.
+- Si indica un rango ambiguo ("la otra semana", "cualquier día"), solicita el día exacto de su preferencia.
+
+FLUJO DE AGENDAMIENTO
+Pide un dato a la vez con naturalidad cuando el paciente desee agendar:
+1. Nombre y apellido.
+2. Número de contacto (valida si usamos el mismo número de WhatsApp desde el que escribe o prefiere otro).
+3. Tratamiento o motivo de la consulta.
+4. Día y turno/hora preferida.
+
+Al reunir la información, resume los datos y notifica que el equipo de recepción se comunicará para confirmar la disponibilidad. NUNCA afirmes que la cita "ya está registrada/confirmada al 100%".`;
 const chatSessions = new Map();
 const failureCounts = new Map();
 
@@ -184,26 +184,47 @@ function textFromHistory(history) {
     .join('\n');
 }
 
-export function extractLeadDataFromText(text, senderPhone = null) {
+export function extractLeadDataFromText(text = '', senderPhone = '', lastBotQuestion = null) {
   if (typeof text !== 'string' || !text.trim()) return null;
-  const nameMatch = text.match(/\b(?:me llamo|mi nombre es|soy)\s+([A-Za-zÁÉÍÓÚáéíóúÑñÜü]+(?:\s+[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+){0,2})(?=\s*(?:[,.\n]|vivo\b|vi\b|mi\b|tengo\b|y\b|con\b|$))/i);
-  
-  let phone = text.replace(/\D/g, '').match(/(?:51)?(9\d{8})/)?.[1] || null;
-  if (!phone && senderPhone && /este (mismo )?n[uú]mero|mi n[uú]mero de whatsapp|con este whatsapp|a este n[uú]mero/i.test(text)) {
-    const rawDigits = String(senderPhone).replace(/\D/g, '');
-    phone = rawDigits.match(/(?:51)?(9\d{8})/)?.[1] || (rawDigits.length >= 9 ? rawDigits.slice(-9) : rawDigits);
+  const cleanText = text.trim();
+  const normalized = cleanText.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const lowerText = normalized.toLowerCase();
+  const data = { nombre: null, telefono: null, motivo: null, fecha_preferida: null, fechaHora: null };
+
+  const phoneMatch = cleanText.match(/\b9\d{8}\b/);
+  if (phoneMatch) {
+    data.telefono = phoneMatch[0];
+  } else if (/^(?:este|este numero|este mismo|aqui|por aca|al mio|si)$/i.test(normalized) || lastBotQuestion === 'telefono') {
+    const senderDigits = String(senderPhone).replace(/\D/g, '');
+    data.telefono = senderDigits.match(/(?:51)?(9\d{8})/)?.[1] || null;
   }
 
-  const dateMatch = text.match(/\b(?:hoy|mañana|pasado mañana|lunes|martes|miércoles|miercoles|jueves|viernes|sábado|sabado)(?:\s+\d{1,2}\s+de\s+[a-záéíóú]+)?(?:\s+(?:a\s*las?\s*)?\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?/i)
-    || text.match(/\b\d{1,2}\s*(?:de\s*)?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)(?:\s+(?:a\s*las?\s*)?\d{1,2}(?::\d{2})?\s*(?:am|pm)?)?/i);
-  const motivoMatch = text.match(/\b(?:tratamiento|motivo)\s*(?:es|:)?\s*([^,.\n]+)/i);
+  const treatments = [
+    'tratamiento de conducto', 'ortodoncia', 'brackets', 'frenillos', 'limpieza',
+    'profilaxis', 'sarro', 'blanqueamiento', 'curacion', 'curaciones', 'resina',
+    'caries', 'endodoncia', 'extraccion', 'sacar muela', 'muela del juicio',
+    'implante', 'protesis', 'consulta', 'evaluacion', 'revision', 'diagnostico',
+  ];
+  const treatment = treatments.find((item) => new RegExp('\\b' + item + '\\b', 'i').test(lowerText));
+  if (treatment) data.motivo = treatment.charAt(0).toUpperCase() + treatment.slice(1);
 
-  return {
-    nombre: nameMatch?.[1]?.trim() || null,
-    telefono: phone || null,
-    motivo: motivoMatch?.[1]?.trim() || null,
-    fechaHora: dateMatch?.[0]?.trim() || null,
-  };
+  const dateMatch = cleanText.match(/\b(?:hoy|mañana|pasado mañana|lunes|martes|miércoles|miercoles|jueves|viernes|sábado|sabado)(?:\s+\d{1,2}\s+de\s+[a-záéíóú]+)?(?:\s+(?:a\s*las?\s*)?\d{1,2}(?::\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.|de la tarde|de la mañana)?)?/i)
+    || cleanText.match(/\b\d{1,2}\s*(?:de\s*)?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)(?:\s+(?:a\s*las?\s*)?\d{1,2}(?::\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.)?)?/i);
+  const timeMatch = /\b\d{1,2}(?::\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.|de la tarde|de la mañana)\b|\b(?:mañana|tarde|noche)\b/i.test(cleanText);
+  if (dateMatch && (timeMatch || /\b(?:hoy|mañana|pasado mañana|lunes|martes|miércoles|miercoles|jueves|viernes|sábado|sabado)\b/i.test(cleanText))) {
+    data.fecha_preferida = timeMatch ? cleanText : dateMatch[0].trim();
+    data.fechaHora = data.fecha_preferida;
+  }
+
+  const explicitName = cleanText.match(/^(?:me llamo|mi nombre es|soy)\s+(.+)$/i);
+  const isNameContext = lastBotQuestion === 'nombre' || Boolean(explicitName);
+  if (isNameContext) {
+    const rawName = (explicitName?.[1] || cleanText).replace(/[^\p{L}\s'-]/gu, '').trim();
+    const words = rawName.split(/\s+/).filter(Boolean);
+    if (words.length >= 1 && words.length <= 4 && !/\d/.test(rawName) && !data.motivo) data.nombre = rawName;
+  }
+
+  return Object.values(data).some(Boolean) ? data : null;
 }
 
 export function isValidName(name) {
