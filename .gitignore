@@ -16,3 +16,4 @@ leads.test.json
 "tests_output_services_recent.txt"
 .DS_Store
 npm-debug.log
+"node_modules" 
